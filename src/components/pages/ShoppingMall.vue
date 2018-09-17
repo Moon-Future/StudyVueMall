@@ -45,14 +45,32 @@
         </swiper>
       </div>
     </div>
-    <swiperDefault></swiperDefault>
+    <floorComponent :floorData="floor1" :floorTitle="floorName.floor1"></floorComponent>
+    <floorComponent :floorData="floor2" :floorTitle="floorName.floor2"></floorComponent>
+    <floorComponent :floorData="floor3" :floorTitle="floorName.floor3"></floorComponent>
+    <div class="hot-area">
+      <div class="hot-title">热卖商品</div>
+      <div class="hot-goods">
+        <van-list>
+          <van-row gutter="20">
+            <van-col span="12" v-for="(item, index) in hotGoods" :key="index">
+              <goods-info :goodsImage="item.image" :goodsName="item.name" :goodsPrice="item.price"></goods-info>
+            </van-col>
+          </van-row>
+        </van-list>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
   import 'swiper/dist/css/swiper.css'
-  import {swiper, swiperSlide} from 'vue-awesome-swiper'
+  import { swiper, swiperSlide } from 'vue-awesome-swiper'
   import swiperDefault from 'components/swiper/swiperDefault'
+  import floorComponent from 'components/component/floorComponent'
+  import goodsInfo from 'components/component/goodsInfoComponent'
+  import { toMoney } from '@/filter/moneyFilter.js'
+  import url from '@/serviceAPI.config.js'
   export default {
     data() {
       return {
@@ -63,27 +81,46 @@
         bannerPicArray: [],
         category: [],
         adBanner: {},
-        recommendGoods: []
+        recommendGoods: [],
+        floor1: [],
+        floor2: [],
+        floor3: [],
+        floorName: {},
+        hotGoods: []
       }
     },
     created() {
-      this.$http.get('https://www.easy-mock.com/mock/5b9e9c792b292b0e9154c6cd/vueMall')
+      this.$http.get(url.getShoppingMallInfo)
         .then(response => {
           if(response.status === 200){
             this.bannerPicArray = response.data.data.slides
             this.category = response.data.data.category
             this.adBanner = response.data.data.advertesPicture
             this.recommendGoods = response.data.data.recommend
+
+            this.floor1 = response.data.data.floor1
+            this.floor2 = response.data.data.floor2
+            this.floor3 = response.data.data.floor3
+            this.floorName = response.data.data.floorName
+
+            this.hotGoods = response.data.data.hotGoods
           }
         })
         .catch(err => {
 
         })
     },
+    filters: {
+      moneyFilter(money) {
+        return toMoney(money)
+      }
+    },
     components: {
       swiper,
       swiperSlide,
-      swiperDefault
+      swiperDefault,
+      floorComponent,
+      goodsInfo
     }
   }
 </script>
@@ -147,6 +184,12 @@
           text-align: center;
         }
       }
+    }
+    .hot-area {
+      text-align: center;
+      font-size:14px;
+      height: 1.8rem;
+      line-height:1.8rem;
     }
   }
 </style>
