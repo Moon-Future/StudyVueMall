@@ -12,6 +12,7 @@
         label="用户名"
         icon="clear"
         placeholder="请输入用户名"
+        :error-message="usernameErrorMsg"
         required
         @click-icon="username = ''"
       />
@@ -21,26 +22,71 @@
         label="密码"
         icon="clear"
         placeholder="请输入密码"
+        :error-message="passwordErrorMsg"
         required
       />
       <div class="register-button">
-        <van-button type="primary" size="large">马上注册</van-button>
+        <van-button type="primary" size="large" :loading="openLoading" @click="registerAction">马上注册</van-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  import url from '@/serviceAPI.config.js'
+  import { Toast } from 'vant'
   export default {
     data() {
       return {
         username: '',
-        password: ''
+        password: '',
+        openLoading: false,
+        usernameErrorMsg: '',
+        passwordErrorMsg: ''
       }
     },
     methods: {
       goBack() {
         this.$router.go(-1)
+      },
+      axiosRegisterUser() {
+        this.openLoading = true
+        this.$http.post(url.registerUser, {
+          userName: this.username,
+          password: this.password
+        }).then(response => {
+          console.log(response)
+          if (response.data.code == 200){
+            Toast.success('注册成功')
+            this.openLoading = true
+          } else {
+            console.log(response.data.message)
+            Toast.fail('注册失败')
+            this.openLoading = false
+          }
+        }).catch(err => {
+          Toast.fail('注册失败')
+          this.openLoading = false
+        })
+      },
+      checkForm() {
+        let isOk = true
+        if (this.username.length < 5) {
+          this.usernameErrorMsg = '用户名不能小于5位'
+          isOk = false
+        } else {
+          this.usernameErrorMsg = ''
+        }
+        if (this.password.length < 6) {
+          this.passwordErrorMsg = '密码不能少于6位'
+          isOk = false
+        } else {
+          this.passwordErrorMsg = ''
+        }
+        return isOk
+      },
+      registerAction() {
+        this.checkForm() && this.axiosRegisterUser()
       }
     }
   }
