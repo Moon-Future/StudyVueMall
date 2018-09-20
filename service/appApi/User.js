@@ -27,10 +27,8 @@ router.post('/login', async (ctx) => {
   let userName = loginUser.userName
   let password = loginUser.password
   const User = mongoose.model('User')
-  console.log(userName, password)
   await User.findOne({userName:userName}).exec().then(async (result) => {
     if (result) {
-      console.log(result)
       //console.log(User)
       //当用户名存在时，开始比对密码
       let newUser = new User()  //因为是实例方法，所以要new出对象，才能调用
